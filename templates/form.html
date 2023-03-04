@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Factura #{{numero_factura}}</title>
+    <style>
+      /* Estilos para el cuerpo de la factura */
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        padding: 20px;
+      }
+
+      /* Estilos para la tabla de detalles de la factura */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      /* Estilos para los totales de la factura */
+      .totals {
+        margin-top: 20px;
+      }
+
+      .totals td {
+        padding: 8px;
+        text-align: right;
+      }
+
+      .totals .label {
+        font-weight: bold;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Factura #{{numero_factura}}</h1>
+      <p><strong>Fecha de Emisión:</strong> {{fecha_emision}}</p>
+    </div>
+    <div>
+      <h2>Información del Cliente</h2>
+      <p><strong>Nombre:</strong> {{nombre_cliente}}</p>
+      <p><strong>Email:</strong> {{email_cliente}}</p>
+      <p><strong>Teléfono:</strong> {{telefono_cliente}}</p>
+      <p><strong>Dirección:</strong> {{direccion_cliente}}</p>
+    </div>
+    <div>
+      <h2>Información del Administrador</h2>
+      <p><strong>Nombre:</strong> {{nombre_admin}}</p>
+      <p><strong>Email:</strong> {{email_admin}}</p>
+      <p><strong>Teléfono:</strong> {{telfono_admin}}</p>
+    </div>
+    <div>
+      <h2>Detalles de la Factura</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre del Artículo</th>
+            <th>Descripción del Artículo</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Precio Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{nombre_articulo1}}</td>
+            <td>{{descripcion_articulo1}}</td>
+            <td>{{cant1}}</td>
+            <td>{{precio_unit}}</td>
+            <td>{{precio_total}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="totals">
+      <table>
+        <tbody>
+          <tr>
+            <td class="label">Subtotal:</td>
+            <td>{{subtotal}}</td>
+          </tr>
+          <tr>
+            <td class="label">Impuestos:</td>
+            <td>{{impuestos}}</td>
+          </tr>
+          <tr>
+            <td class="label">Total a Pagar:</td>
+            <td>{{total_pagar}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
