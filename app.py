@@ -1,65 +1,91 @@
-from flask import Flask, request, send_file
-from flask_mail import Mail, Message
-from flask import render_template
-import pdfkit
-from decimal import Decimal
+from flask import Flask, render_template, request
+from xhtml2pdf import pisa
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 app = Flask(__name__)
-app.config['MAIL_SERVER']='smtp.office365.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'storebabyprince@outlook.com'
-app.config['MAIL_PASSWORD'] = 'Janina123@'
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
 
-mail = Mail(app)
-
-@app.route('/generate_pdf', methods=['POST'])
-def generate_pdf():
+@app.route('/enviar_pdf', methods=['POST'])
+def enviar_pdf():
+    # Obtener datos del objeto JSON enviado en la solicitud POST
     data = request.get_json()
-    numero_factura = data['numero_factura']
-    fecha_emision = data['fecha_emision']
-    nombre_cliente = data['nombre_cliente']
-    email_cliente = data['email_cliente']
-    telefono_cliente = data['telefono_cliente']
-    direccion_cliente = data['direccion_cliente']
-    nombre_admin = data['nombre_admin']
-    email_admin = data['email_admin']
-    telefono_admin = data['telefono_admin']
-    nombre_articulo1 = data['nombre_articulo1']
-    descripcion_articulo1 = data['descripcion_articulo1']
-    cant1 = Decimal(data['cant1'])
-    precio_unit = Decimal(data['precio_unit'])
-    precio_total = Decimal(data['precio_total'])
-    subtotal = Decimal(data['subtotal'])
-    impuestos = Decimal(data['impuestos'])
-    total_pagar = Decimal(data['total_pagar'])
+    numero_factura = data.get('numero_factura')
+    fecha_emision = data.get('fecha_emision')
+    nombre_cliente = data.get('nombre_cliente')
+    email_cliente = data.get('email_cliente')
+    telefono_cliente = data.get('telefono_cliente')
+    direccion_cliente = data.get('direccion_cliente')
+    nombre_admin = data.get('nombre_admin')
+    email_admin = data.get('email_admin')
+    telefono_admin = data.get('telefono_admin')
+    nombre_articulo = data.get('nombre_articulo')
+    descripcion_articulo = data.get('descripcion_articulo')
+    cant_str = data.get('cant')
+    precio_unit_str = data.get('precio_unit')
+    precio_total_str = data.get('precio_total')
+    subtotal_str = data.get('subtotal')
+    impuestos_str = data.get('impuestos')
+    total_pagar_str = data.get('total_pagar')
 
-    # Renderizar el template HTML con los datos del usuario
-    html = render_template('form.html', numero_factura=numero_factura, fecha_emision=fecha_emision,
-                           nombre_cliente=nombre_cliente, email_cliente=email_cliente,
-                           telefono_cliente=telefono_cliente, direccion_cliente=direccion_cliente,
-                           nombre_admin=nombre_admin, email_admin=email_admin, telefono_admin=telefono_admin,
-                           nombre_articulo1=nombre_articulo1, descripcion_articulo1=descripcion_articulo1,
-                           cant1="${:.2f}".format(cant1), precio_unit="${:.2f}".format(precio_unit),
-                           precio_total="${:.2f}".format(precio_total),
-                           subtotal="${:.2f}".format(subtotal),
-                           impuestos="${:.2f}".format(impuestos),
-                           total_pagar="${:.2f}".format(total_pagar))
+    # convertir los valores a tipo float
+    cant = float(cant_str) if cant_str is not None else None
+    precio_unit = float(precio_unit_str) if precio_unit_str is not None else None
+    precio_total = float(precio_total_str) if precio_total_str is not None else None
+    subtotal = float(subtotal_str) if subtotal_str is not None else None
+    impuestos = float(impuestos_str) if impuestos_str is not None else None
+    total_pagar = float(total_pagar_str) if total_pagar_str is not None else None
 
-    config = pdfkit.configuration(wkhtmltopdf='C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    # Genera el archivo PDF utilizando pdfkit y wkhtmltopdf
-    pdf_file = 'invoice.pdf'
-    pdfkit.from_string(html, pdf_file, configuration=config)
+    # Renderizar plantilla HTML con los datos del formulario
+    html = render_template('form.html', 
+                           numero_factura=numero_factura,
+                           fecha_emision=fecha_emision,
+                           nombre_cliente=nombre_cliente,
+                           email_cliente=email_cliente,
+                           telefono_cliente=telefono_cliente,
+                           direccion_cliente=direccion_cliente,
+                           nombre_admin=nombre_admin,
+                           email_admin=email_admin,
+                           telefono_admin=telefono_admin,
+                           nombre_articulo=nombre_articulo,
+                           descripcion_articulo=descripcion_articulo,
+                           cant=cant,
+                           precio_unit=precio_unit,
+                           precio_total=precio_total,
+                           subtotal=subtotal,
+                           impuestos=impuestos,
+                           total_pagar=total_pagar)
 
-    # Mandar el correo electrónico con el archivo PDF adjunto
-    msg = Message('PDF generado', sender='storebabyprince@outlook.com', recipients=[email_cliente])
-    with app.open_resource(pdf_file) as fp:
-        msg.attach(pdf_file, "application/pdf", fp.read())
-    mail.send(msg)
+    # Crear archivo PDF a partir
+    pdf = None
+    try:
+        pdf = pisa.CreatePDF(html)
+    except Exception as e:
+        return "Error creando el documento PDF"
 
-    # Enviar el archivo PDF generado al cliente
-    return send_file(pdf_file, as_attachment=True)
+    # Crear mensaje de correo electrónico con archivo adjunto
+    msg = MIMEMultipart()
+    msg['From'] = 'storebabyprince@outlook.com'
+    msg['To'] = email_cliente
+    msg['Subject'] = 'Factura'
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    if nombre_cliente is not None:
+        body = "Hola " + nombre_cliente + ",\n\n" + "Adjunto encontrará su factura correspondiente a la compra realizada."
+    else:
+        body = "Hola,\n\nAdjunto encontrará su factura correspondiente a la compra realizada."
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    filename = "factura.pdf"
+    part = MIMEApplication(pdf.dest.getvalue(), _subtype = 'pdf')
+    part.add_header('content-disposition', 'attachment', filename=filename)
+    msg.attach(part)
+
+    # Enviar correo electrónico con archivo adjunto
+    server = smtplib.SMTP('smtp-mail.outlook.com', 587)
+    server.starttls()
+    server.login('storebabyprince@outlook.com', 'Janina123@')
+    server.sendmail('storebabyprince@outlook.com', email_cliente, msg.as_string())
+    server.quit()
+    return "documento PDF enviado con éxito"
