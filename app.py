@@ -4,6 +4,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+import os
 
 app = Flask(__name__)
 
@@ -66,7 +67,7 @@ def enviar_pdf():
 
     # Crear mensaje de correo electrónico con archivo adjunto
     msg = MIMEMultipart()
-    msg['From'] = 'storebabyprince@outlook.com'
+    msg['From'] = os.environ.get('EMAIL_USERNAME')
     msg['To'] = email_cliente
     msg['Subject'] = 'Factura'
 
@@ -85,7 +86,7 @@ def enviar_pdf():
     # Enviar correo electrónico con archivo adjunto
     server = smtplib.SMTP('smtp-mail.outlook.com', 587)
     server.starttls()
-    server.login('storebabyprince@outlook.com', 'Janina123@')
-    server.sendmail('storebabyprince@outlook.com', email_cliente, msg.as_string())
+    server.login(os.environ.get('EMAIL_USERNAME'), os.environ.get('EMAIL_PASSWORD'))
+    server.sendmail(os.environ.get('EMAIL_USERNAME'), email_cliente, msg.as_string())
     server.quit()
     return "documento PDF enviado con éxito"

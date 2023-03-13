@@ -1,0 +1,23 @@
+Este código implementa una aplicación web Flask que recibe una solicitud POST con datos
+de una factura en formato JSON, convierte los datos a un archivo PDF usando la biblioteca
+xhtml2pdf y envía el PDF por correo electrónico al cliente.
+
+El código comienza importando las bibliotecas necesarias. Flask se utiliza para crear la aplicación web,
+render_template se utiliza para procesar una plantilla HTML con datos y devolver el resultado al usuario,
+request se utiliza para obtener los datos de la solicitud POST y pisa se utiliza para convertir 
+la plantilla HTML a PDF. También se importan las bibliotecas necesarias para enviar correo electrónico,
+como smtplib y email.mime.
+
+A continuación, se define la ruta /enviar_pdf para manejar la solicitud POST. Los datos JSON enviados 
+con la solicitud se extraen utilizando request.get_json(). Luego, los datos se utilizan para renderizar 
+la plantilla HTML utilizando render_template(). La plantilla HTML se define en el archivo form.html y 
+se le pasan los datos de la factura para su procesamiento.
+
+Después de renderizar la plantilla HTML, se crea un archivo PDF utilizando pisa.CreatePDF(). Si se produce 
+un error durante este proceso, se devuelve un mensaje de error.
+
+A continuación, se crea un mensaje de correo electrónico utilizando MIMEMultipart(). El archivo PDF se adjunta 
+al mensaje de correo electrónico como un archivo adjunto utilizando MIMEApplication(). El cuerpo del correo 
+electrónico se define utilizando MIMEText().
+
+Finalmente, el correo electrónico se envía utilizando
