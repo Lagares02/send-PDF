@@ -1,0 +1,61 @@
+{
+    "facturas": [
+      {
+        "cliente_id": 123,
+        "numero_factura": 1,
+        "fecha_emision": "2023-03-18",
+        "nombre_cliente": "Mayra De Voz",
+        "email_cliente": "maydevoz@gmail.com",
+        "telefono_cliente": "555-1234",
+        "direccion_cliente": "Calle 123, Ciudad",
+        "articulos": [
+          {
+            "nombre": "Producto 1",
+            "descripcion": "Descripción del Producto 1",
+            "cant": 2,
+            "precio_unit": 10.00,
+            "precio_total": 20.00
+          },
+          {
+            "nombre": "Producto 2",
+            "descripcion": "Descripción del Producto 2",
+            "cant": 1,
+            "precio_unit": 15.00,
+            "precio_total": 15.00
+          }
+        ],
+        "subtotal": 35.00,
+        "impuestos": 3.15,
+        "total_pagar": 38.15
+      },
+      {
+        "cliente_id": 456,
+        "numero_factura": 2,
+        "fecha_emision": "2023-03-18",
+        "nombre_cliente": "Harold Styven",
+        "email_cliente": "harithodevoz@gmail.com",
+        "telefono_cliente": "555-5678",
+        "direccion_cliente": "Calle 456, Ciudad",
+        "articulos": [
+          {
+            "nombre": "Producto 3",
+            "descripcion": "Descripción del Producto 3",
+            "cant": 1,
+            "precio_unit": 5.00,
+            "precio_total": 5.00
+          },
+          {
+            "nombre": "Producto 4",
+            "descripcion": "Descripción del Producto 4",
+            "cant": 3,
+            "precio_unit": 8.00,
+            "precio_total": 24.00
+          }
+        ],
+        "subtotal": 29.00,
+        "impuestos": 2.61,
+        "total_pagar": 31.61
+      }
+    ]
+  }
+  

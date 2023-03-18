@@ -69,13 +69,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>{{nombre_articulo}}</td>
-            <td>{{descripcion_articulo}}</td>
-            <td>{{cant}}</td>
-            <td>{{precio_unit}}</td>
-            <td>{{precio_total}}</td>
-          </tr>
+          {% for articulo in articulos %}
+            <tr>
+              <td>{{ articulo['nombre'] }}</td>
+              <td>{{ articulo['descripcion'] }}</td>
+              <td>{{ articulo['cant'] }}</td>
+              <td>{{ articulo['precio_unit'] }}</td>
+              <td>{{ articulo['precio_total'] }}</td>
+            </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>

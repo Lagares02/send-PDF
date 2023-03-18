@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+import json
+from flask import Flask, render_template
 from xhtml2pdf import pisa
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -8,35 +9,33 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/enviar_pdf', methods=['POST'])
-def enviar_pdf():
-    # Obtener datos del objeto JSON enviado en la solicitud POST
-    data = request.get_json()
-    numero_factura = data.get('numero_factura')
-    fecha_emision = data.get('fecha_emision')
-    nombre_cliente = data.get('nombre_cliente')
-    email_cliente = data.get('email_cliente')
-    telefono_cliente = data.get('telefono_cliente')
-    direccion_cliente = data.get('direccion_cliente')
-    nombre_admin = data.get('nombre_admin')
-    email_admin = data.get('email_admin')
-    telefono_admin = data.get('telefono_admin')
-    nombre_articulo = data.get('nombre_articulo')
-    descripcion_articulo = data.get('descripcion_articulo')
-    cant_str = data.get('cant')
-    precio_unit_str = data.get('precio_unit')
-    precio_total_str = data.get('precio_total')
-    subtotal_str = data.get('subtotal')
-    impuestos_str = data.get('impuestos')
-    total_pagar_str = data.get('total_pagar')
+@app.route('/enviar_pdf/<int:cliente_id>/<int:numero_factura>', methods=['GET'])
+def enviar_pdf(cliente_id, numero_factura):
+    # Cargar datos del archivo JSON
+    with open('media/data.json') as f:
+        data = json.load(f)
 
-    # convertir los valores a tipo float
-    cant = float(cant_str) if cant_str is not None else None
-    precio_unit = float(precio_unit_str) if precio_unit_str is not None else None
-    precio_total = float(precio_total_str) if precio_total_str is not None else None
-    subtotal = float(subtotal_str) if subtotal_str is not None else None
-    impuestos = float(impuestos_str) if impuestos_str is not None else None
-    total_pagar = float(total_pagar_str) if total_pagar_str is not None else None
+    # Buscar factura en el archivo JSON
+    factura = None
+    for f in data['facturas']:
+        if f['cliente_id'] == cliente_id and f['numero_factura'] == numero_factura:
+            factura = f
+            break
+
+    # Verificar si se encontró la factura
+    if factura is None:
+        return "No se encontró la factura especificada"
+
+    # Obtener datos de la factura
+    fecha_emision = factura['fecha_emision']
+    nombre_cliente = factura['nombre_cliente']
+    email_cliente = factura['email_cliente']
+    telefono_cliente = factura['telefono_cliente']
+    direccion_cliente = factura['direccion_cliente']
+    articulos = factura.get('articulos', [])
+    subtotal = factura["subtotal"]
+    impuestos = factura["impuestos"]
+    total_pagar = factura["total_pagar"]
 
     # Renderizar plantilla HTML con los datos del formulario
     html = render_template('form.html', 
@@ -46,17 +45,15 @@ def enviar_pdf():
                            email_cliente=email_cliente,
                            telefono_cliente=telefono_cliente,
                            direccion_cliente=direccion_cliente,
-                           nombre_admin=nombre_admin,
-                           email_admin=email_admin,
-                           telefono_admin=telefono_admin,
-                           nombre_articulo=nombre_articulo,
-                           descripcion_articulo=descripcion_articulo,
-                           cant=cant,
-                           precio_unit=precio_unit,
-                           precio_total=precio_total,
+                           articulos=articulos,
                            subtotal=subtotal,
                            impuestos=impuestos,
                            total_pagar=total_pagar)
+
+    # convertir los valores a tipo float
+    subtotal = float(subtotal) if subtotal is not None else None
+    impuestos = float(impuestos) if impuestos is not None else None
+    total_pagar = float(total_pagar) if total_pagar is not None else None
 
     # Crear archivo PDF a partir
     pdf = None
