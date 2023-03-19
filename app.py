@@ -33,27 +33,30 @@ def enviar_pdf(cliente_id, numero_factura):
     telefono_cliente = factura['telefono_cliente']
     direccion_cliente = factura['direccion_cliente']
     articulos = factura.get('articulos', [])
-    subtotal = factura["subtotal"]
-    impuestos = factura["impuestos"]
-    total_pagar = factura["total_pagar"]
+
+    # Calcular subtotal, impuestos y total a pagar
+    subtotal = 0.0
+    for a in articulos:
+        a['precio_total'] = a['cant'] * a['precio_unit']
+        subtotal += a['precio_total']
+
+    impuestos = 0.0
+    if 'impuestos' in factura:
+        impuestos = factura['impuestos']
+    total_pagar = subtotal + impuestos
 
     # Renderizar plantilla HTML con los datos del formulario
     html = render_template('form.html', 
-                           numero_factura=numero_factura,
-                           fecha_emision=fecha_emision,
-                           nombre_cliente=nombre_cliente,
-                           email_cliente=email_cliente,
-                           telefono_cliente=telefono_cliente,
-                           direccion_cliente=direccion_cliente,
-                           articulos=articulos,
-                           subtotal=subtotal,
-                           impuestos=impuestos,
-                           total_pagar=total_pagar)
-
-    # convertir los valores a tipo float
-    subtotal = float(subtotal) if subtotal is not None else None
-    impuestos = float(impuestos) if impuestos is not None else None
-    total_pagar = float(total_pagar) if total_pagar is not None else None
+                        numero_factura=numero_factura,
+                        fecha_emision=fecha_emision,
+                        nombre_cliente=nombre_cliente,
+                        email_cliente=email_cliente,
+                        telefono_cliente=telefono_cliente,
+                        direccion_cliente=direccion_cliente,
+                        articulos=articulos,
+                        subtotal=subtotal,
+                        impuestos=impuestos,
+                        total_pagar=total_pagar)
 
     # Crear archivo PDF a partir
     pdf = None
